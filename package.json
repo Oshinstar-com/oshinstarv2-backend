@@ -1,0 +1,44 @@
+{
+    "name": "oshinstar-backend",
+    "version": "1.0.0",
+    "main": "dist/server.js",
+    "scripts": {
+        "start": "ts-node-dev --respawn --transpile-only src/server.ts"
+    },
+    "dependencies": {
+        "@elastic/elasticsearch": "^8.14.0",
+        "bcrypt": "^5.1.1",
+        "chalk": "^5.3.0",
+        "connect-mongo": "^4.6.0",
+        "cors": "^2.8.5",
+        "csv-parser": "^3.0.0",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "express-session": "^1.17.2",
+        "fuse.js": "^7.0.0",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^6.0.13",
+        "morgan": "^1.10.0",
+        "nodemailer": "^6.9.14",
+        "otplib": "^12.0.1",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.1",
+        "thirty-two": "^1.0.2",
+        "twilio": "^5.1.0",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.2",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.13",
+        "@types/express-session": "^1.17.4",
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/morgan": "^1.9.9",
+        "@types/node": "^16.11.6",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.6",
+        "@types/uuid": "^9.0.8",
+        "ts-node-dev": "^1.1.8",
+        "typescript": "^4.4.4"
+    }
+}
