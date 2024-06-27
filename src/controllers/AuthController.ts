@@ -8,6 +8,18 @@ import * as otplib from 'otplib';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your_jwt_refresh_secret_key';
 
+
+
+const parseMonth = (month: string): string => {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const monthIndex = months.indexOf(month) + 1;
+  return monthIndex < 10 ? `0${monthIndex}` : `${monthIndex}`;
+};
+
+
 /**
  * @swagger
  * tags:
@@ -205,5 +217,66 @@ export abstract class AuthController {
    */
   public static async disable2fa(clientId: string): Promise<void> {
     await User.updateOne({ userId: clientId.toString() }, { hasTwoFactor: false });
+  }
+
+  static async updateUserPassword(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
+    try {
+      const { userId, newPassword } = req.body;
+
+      if (!userId || !newPassword) {
+        return res.status(400).json({ error: 'User ID and new password are required' });
+      }
+
+      const user = await User.findOne({ userId });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      await user.save();
+
+      return res.status(200).json({ message: 'Password updated successfully' });
+    } catch (err: any) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
+  };
+
+  static async updateBirthdate(req: Request, res: Response) {
+    try {
+      const { userId, day, month, year } = req.body;
+  
+      // Check if userId is provided
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+  
+      // Find the user by userId
+      const user = await User.findOne({ userId: userId });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      // Parse the birthdate components
+      const parsedMonth = parseMonth(month);
+  
+      // Create a new Date object for the birthdate
+
+      const newBirthdate = `${year}-${parsedMonth}-${day}T00:00:00.000Z`;
+  
+      // Update the user's birthdate
+      console.log(newBirthdate)
+      user.birthdate = newBirthdate
+      user.canUpdateBirthdate = false;
+      await user.save();
+
+
+      return res.status(200).json({ message: 'Birthdate updated successfully', birthdate: user.birthdate });
+    } catch (err: any) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
   }
 }

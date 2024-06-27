@@ -9,7 +9,7 @@ export interface IUser extends Document {
   firstName?: string;
   lastName?: string;
   gender?: string;
-  birthdate?: Date;
+  birthdate?: string;
   phone?: string;
   location?: string;
   categories?: string[];
@@ -24,6 +24,11 @@ export interface IUser extends Document {
   collections?: string[];
   secretKey?: string;
   emailCode?: string;
+  memberSince?: string;
+  canUpdateBirthdate? : boolean;
+  hometown?: string;
+  address?: string;
+  username?: string;
 }
 
 
@@ -36,7 +41,7 @@ const UserSchema: Schema = new Schema({
   firstName: { type: String },
   lastName: { type: String },
   gender: { type: String },
-  birthdate: { type: Date },
+  birthdate: { type: String },
   phone: { type: String },
   location: { type: String },
   categories: { type: Array, default: [] },
@@ -50,7 +55,12 @@ const UserSchema: Schema = new Schema({
   tracks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Track' }],
   collections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Collection' }],
   secretKey: { type: String, default: "" },
-  emailCode: { type: String }
+  emailCode: { type: String },
+  memberSince: { type: String },
+  canUpdateBirthdate: { type: Boolean, default: true },
+  hometown: { type: String },
+  address: { type: String },
+  username: { type: String }
 });
 
 const User = mongoose.model<IUser>('User', UserSchema);

@@ -25,7 +25,7 @@ app.use(session);
 app.use(morgan("common"));
 
 const corsOptions = {
-  origin: 'http://localhost:54038', // Replace with your specific origin
+  origin: 'http://localhost:8080', // Replace with your specific origin
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204

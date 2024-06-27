@@ -114,9 +114,9 @@ abstract class SignupController {
         isEmailVerified,
         accountType
       } = req.body;
-
+  
       let user: IUser | null;
-
+  
       if (userId) {
         // Update existing user
         user = await User.findOne({ userId });
@@ -127,6 +127,9 @@ abstract class SignupController {
           user.email = email || user.email;
           user.firstName = firstName || user.firstName;
           user.lastName = lastName || user.lastName;
+          if (firstName && lastName) {
+            user.username = await SignupController.generateUniqueUsername(firstName, lastName);
+          }
           user.gender = gender || user.gender;
           user.birthdate = birthdate || user.birthdate;
           user.phone = phone || user.phone;
@@ -135,7 +138,7 @@ abstract class SignupController {
           user.isPhoneVerified = isPhoneVerified ?? user.isPhoneVerified;
           user.isEmailVerified = isEmailVerified ?? user.isEmailVerified;
           user.accountType = accountType ?? user.accountType;
-
+  
           await user.save();
           return res.status(200).json(user);
         } else {
@@ -146,16 +149,22 @@ abstract class SignupController {
         if (!email) {
           return res.status(400).json({ error: 'Email is required to create a new user' });
         }
-
+  
         // Check if the email already exists
         user = await User.findOne({ email });
         if (user) {
           return res.status(400).json({ error: 'Email already exists' });
         }
-
+  
         // Encrypt the password before creating a new user, if password is provided
         const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
-
+  
+        // Generate a unique username
+        let username = '';
+        if (firstName && lastName) {
+          username = await SignupController.generateUniqueUsername(firstName, lastName);
+        }
+  
         // Create new user with optional fields
         user = new User({
           userId: uuidv4(),
@@ -163,6 +172,7 @@ abstract class SignupController {
           password: hashedPassword,
           firstName: firstName || '',
           lastName: lastName || '',
+          username: username,
           gender: gender || '',
           birthdate: birthdate || null,
           phone: phone || '',
@@ -170,20 +180,35 @@ abstract class SignupController {
           categories: categories || [],
           isPhoneVerified: isPhoneVerified ?? false,
           isEmailVerified: isEmailVerified ?? false,
-          accountType: accountType || ''
+          accountType: accountType || '',
+          memberSince: new Date().toISOString().split('T')[0]  // Only date, not time
         });
-
+  
         await user.save();
-
+  
         // Generate a JWT token
         const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '365d' });
-
+  
         return res.status(201).json({ token, user });
       }
     } catch (err: any) {
       console.error(err);
       return res.status(500).json({ error: err.message });
     }
+  }
+  
+  static async generateUniqueUsername(firstName: string, lastName: string): Promise<string> {
+    let baseUsername = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
+    let username = baseUsername;
+    let counter = 1;
+  
+    // Check for existing usernames and append a number if necessary
+    while (await User.findOne({ username })) {
+      username = `${baseUsername}${counter}`;
+      counter++;
+    }
+  
+    return username;
   }
 
   /**
@@ -469,7 +494,7 @@ abstract class SignupController {
     }
   }
 
-  
+
   /**
    * @swagger
    * /v1/verify_email:

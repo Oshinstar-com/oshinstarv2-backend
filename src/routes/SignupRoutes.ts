@@ -202,4 +202,30 @@ router.post('/v1/verify_email', SignupController.verifyEmail);
  */
 router.post('/v1/validate_email', SignupController.verifyToken);
 
+
+
+router.post("/v3/auth", async function (req: any, reply: any) {
+    switch (req.body.eventType) {
+        case 'request_qr':
+            const data = await AuthController.generateTOTPSetupUrl(req.body.clientId);
+
+            reply.send({ link: data.totpUri, key: data.secretKey, formattedKey: data.formattedKey + "..." });
+            break;
+        case 'validate_totp':
+            const valid = await AuthController.validateTOTPCode(req.body.clientId.toString(), req.body.totp.toString());
+            reply.send({ "valid": valid });
+            break;
+        case 'disable_2fa':
+            await AuthController.disable2fa(req.body.clientId.toString());
+            reply.send({})
+            break;
+    }
+});
+
+
+router.post("/v3/auth/update_password", AuthController.updateUserPassword);
+
+
+router.post('/v1/user/update_birthdate', AuthController.updateBirthdate);
+
 export default router;

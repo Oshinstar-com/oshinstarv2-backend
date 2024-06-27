@@ -73,5 +73,7 @@ router.post("/v3/auth", async function (req: any, reply: any) {
   });
 
 
+  router.post("/v3/auth/update_password", AuthController.updateUserPassword);
+
 
   export default router;
